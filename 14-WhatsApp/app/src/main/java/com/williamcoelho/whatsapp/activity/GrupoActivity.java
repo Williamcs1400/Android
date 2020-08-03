@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.williamcoelho.whatsapp.R;
 import com.williamcoelho.whatsapp.adapter.AdapterContatos;
+import com.williamcoelho.whatsapp.adapter.AdapterGrupoSelecionado;
 import com.williamcoelho.whatsapp.config.ConfiguracaoFirebase;
 import com.williamcoelho.whatsapp.helper.RecyclerItemClickListener;
 import com.williamcoelho.whatsapp.helper.UsuarioFirebase;
@@ -35,20 +36,27 @@ public class GrupoActivity extends AppCompatActivity {
     private RecyclerView recyclerMembrosSelecionados;
 
     private AdapterContatos adapterContatos;
+    private AdapterGrupoSelecionado adapterGrupoSelecionado;
 
     private List<Usuario> listaMembros = new ArrayList<>();
     private List<Usuario> listaMembrosSelecionados = new ArrayList<>();
+
+    private int qtdSelecionados;
+    private int qtdTotal;
 
     private DatabaseReference contatosRef;
 
     private FirebaseUser userAtual;
 
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grupo);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setTitle("Novo grupo");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +85,11 @@ public class GrupoActivity extends AppCompatActivity {
 
         recuperarContatos();
 
-        recyclerMembros.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), recyclerMembros, new RecyclerItemClickListener.OnItemClickListener() {
+        recyclerMembros.addOnItemTouchListener(
+                new RecyclerItemClickListener(
+                        getApplicationContext(),
+                        recyclerMembros,
+                        new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
 
@@ -89,6 +101,9 @@ public class GrupoActivity extends AppCompatActivity {
 
                 //Adiciona na lista de selecionados
                 listaMembrosSelecionados.add(usuarioSelecionado);
+                adapterGrupoSelecionado.notifyDataSetChanged();
+
+                atualizarParticipantesToolbar();
 
             }
 
@@ -103,6 +118,43 @@ public class GrupoActivity extends AppCompatActivity {
             }
         }));
 
+        //Configura o adapter dos membros selecionados
+        adapterGrupoSelecionado = new AdapterGrupoSelecionado(listaMembrosSelecionados, getApplicationContext());
+
+        //Configura o recycler view dos membros selecionados
+        RecyclerView.LayoutManager layoutManagerHorizontal = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerMembrosSelecionados.setLayoutManager(layoutManagerHorizontal);
+        recyclerMembrosSelecionados.setHasFixedSize(true);
+        recyclerMembrosSelecionados.setAdapter(adapterGrupoSelecionado);
+
+        recyclerMembrosSelecionados.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), recyclerMembrosSelecionados, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+                Usuario usuarioSelecionado = listaMembrosSelecionados.get(position);
+
+                //Remover da lista
+                listaMembrosSelecionados.remove(usuarioSelecionado);
+                adapterGrupoSelecionado.notifyDataSetChanged();
+
+                //Colocar na outra lista
+                listaMembros.add(usuarioSelecionado);
+                adapterContatos.notifyDataSetChanged();
+
+                atualizarParticipantesToolbar();
+
+            }
+
+            @Override
+            public void onLongItemClick(View view, int position) {
+
+            }
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        }));
     }
 
     public void recuperarContatos(){
@@ -129,6 +181,14 @@ public class GrupoActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void atualizarParticipantesToolbar(){
+
+        qtdSelecionados = listaMembrosSelecionados.size();
+        qtdTotal = listaMembros.size() + qtdSelecionados;
+
+        toolbar.setSubtitle(qtdSelecionados + " de " + qtdTotal + " selecionados");
 
     }
 

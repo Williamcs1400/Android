@@ -36,7 +36,6 @@ public class AdapterContatos extends RecyclerView.Adapter<AdapterContatos.MyView
 
         View itemLista = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_lista, parent, false);
 
-
         return new MyViewHolder(itemLista);
     }
 
