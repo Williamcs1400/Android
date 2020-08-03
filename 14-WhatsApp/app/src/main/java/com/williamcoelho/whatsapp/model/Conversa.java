@@ -9,8 +9,13 @@ public class Conversa {
     private String idDestinatario;
     private String ultimaMensagem;
     private Usuario usuarioExibicao;
+    private String ehGrupo;
+    private Grupo grupo;
 
     public Conversa() {
+
+        this.setEhGrupo("false");
+
     }
 
     public void salvar(){
@@ -24,6 +29,22 @@ public class Conversa {
 
     public String getIdRemetente() {
         return idRemetente;
+    }
+
+    public String getEhGrupo() {
+        return ehGrupo;
+    }
+
+    public void setEhGrupo(String ehGrupo) {
+        this.ehGrupo = ehGrupo;
+    }
+
+    public Grupo getGrupo() {
+        return grupo;
+    }
+
+    public void setGrupo(Grupo grupo) {
+        this.grupo = grupo;
     }
 
     public void setIdRemetente(String idRemetente) {

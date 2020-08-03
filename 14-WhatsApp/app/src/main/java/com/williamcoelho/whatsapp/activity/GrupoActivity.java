@@ -1,9 +1,9 @@
 package com.williamcoelho.whatsapp.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +27,7 @@ import com.williamcoelho.whatsapp.helper.RecyclerItemClickListener;
 import com.williamcoelho.whatsapp.helper.UsuarioFirebase;
 import com.williamcoelho.whatsapp.model.Usuario;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,8 @@ public class GrupoActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
 
+    private FloatingActionButton fabAvancarCadastro;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,18 +61,10 @@ public class GrupoActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle("Novo grupo");
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         //Configuracoes iniciais
         recyclerMembros = findViewById(R.id.recyclerMembros);
         recyclerMembrosSelecionados = findViewById(R.id.recyclerMembrosSelecionados);
+        fabAvancarCadastro = findViewById(R.id.fabSalvarGrupo);
 
         contatosRef = ConfiguracaoFirebase.getFirebaseDatabase().child("Usuários");
         userAtual = UsuarioFirebase.getUsuarioAtual();
@@ -155,6 +150,17 @@ public class GrupoActivity extends AppCompatActivity {
 
             }
         }));
+
+        //Configurar fab
+        fabAvancarCadastro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(GrupoActivity.this, CadastroGrupoActivity.class);
+                i.putExtra("Membros", (Serializable) listaMembrosSelecionados);
+                startActivity(i);
+            }
+        });
+
     }
 
     public void recuperarContatos(){
@@ -191,5 +197,7 @@ public class GrupoActivity extends AppCompatActivity {
         toolbar.setSubtitle(qtdSelecionados + " de " + qtdTotal + " selecionados");
 
     }
+
+
 
 }

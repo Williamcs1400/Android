@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.williamcoelho.whatsapp.R;
 import com.williamcoelho.whatsapp.model.Conversa;
+import com.williamcoelho.whatsapp.model.Grupo;
 
 import java.util.List;
 
@@ -45,19 +46,41 @@ public class AdapterConversas extends RecyclerView.Adapter<AdapterConversas.MyVi
 
         Conversa listaConversa = conversas.get(position);
 
-        holder.textViewNomeContato.setText(listaConversa.getUsuarioExibicao().getNome());
-        holder.textViewEmailContato.setText(listaConversa.getUltimaMensagem());
+        if(listaConversa.getEhGrupo().equals("true")){
 
-        if(listaConversa.getUsuarioExibicao().getFoto() != null){
+            Grupo grupo = listaConversa.getGrupo();
+            holder.textViewNomeContato.setText(grupo.getNome());
+            holder.textViewEmailContato.setText("");
 
-            Uri uri = Uri.parse(listaConversa.getUsuarioExibicao().getFoto());
+            if(grupo.getFoto() != null){
 
-            Glide.with(context).load(uri).into(holder.imageViewFotoContato);
+                Uri uri = Uri.parse(grupo.getFoto());
 
-        }else{
+                Glide.with(context).load(uri).into(holder.imageViewFotoContato);
 
-            holder.imageViewFotoContato.setImageResource(R.drawable.padrao);
+            }else{
 
+                holder.imageViewFotoContato.setImageResource(R.drawable.ic_grupo_perfil);
+
+            }
+
+
+        }else {
+
+            holder.textViewNomeContato.setText(listaConversa.getUsuarioExibicao().getNome());
+            holder.textViewEmailContato.setText(listaConversa.getUltimaMensagem());
+
+            if(listaConversa.getUsuarioExibicao().getFoto() != null){
+
+                Uri uri = Uri.parse(listaConversa.getUsuarioExibicao().getFoto());
+
+                Glide.with(context).load(uri).into(holder.imageViewFotoContato);
+
+            }else{
+
+                holder.imageViewFotoContato.setImageResource(R.drawable.padrao);
+
+            }
         }
     }
 
