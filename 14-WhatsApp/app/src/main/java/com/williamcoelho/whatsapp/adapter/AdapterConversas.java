@@ -46,12 +46,12 @@ public class AdapterConversas extends RecyclerView.Adapter<AdapterConversas.MyVi
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
         Conversa listaConversa = conversas.get(position);
+        holder.textViewEmailContato.setText(listaConversa.getUltimaMensagem());
 
         if(listaConversa.getEhGrupo().equals("true")){
 
             Grupo grupo = listaConversa.getGrupo();
             holder.textViewNomeContato.setText(grupo.getNome());
-            holder.textViewEmailContato.setText("");
 
             if(grupo.getFoto() != null){
 

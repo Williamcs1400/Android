@@ -63,6 +63,7 @@ public class ChatActivity extends AppCompatActivity {
     private List<Mensagem> listaMensagens = new ArrayList<>();
 
     private Usuario usuarioDestinatario;
+    private Usuario usuarioRemetente;
 
     private ChildEventListener childEventListenerMensagens;
 
@@ -100,6 +101,7 @@ public class ChatActivity extends AppCompatActivity {
 
         //Recupera usuario remetente
         idRemetente = UsuarioFirebase.getIdUsuario();
+        usuarioRemetente = UsuarioFirebase.getDadosUsuariosLogado();
 
         //Recupera dados do Usuario passado
         Bundle bundle = getIntent().getExtras();
@@ -294,7 +296,6 @@ public class ChatActivity extends AppCompatActivity {
                 salvarConversa(idRemetente, idDestinatario, usuarioDestinatario, mensagem, false);
 
                 //salvar conversa para o destinatario
-                Usuario usuarioRemetente = UsuarioFirebase.getDadosUsuariosLogado();
                 salvarConversa(idDestinatario, idRemetente, usuarioRemetente, mensagem, false);
 
                 //Limpar caixa de texto
@@ -309,6 +310,7 @@ public class ChatActivity extends AppCompatActivity {
                     Mensagem mensagem = new Mensagem();
                     mensagem.setIdUsuario(idUsuarioLogadoGrupo);
                     mensagem.setConteudo(conteudo);
+                    mensagem.setNome(usuarioRemetente.getNome());
 
                     salvarMensagem(idRemetenteGrupo, idDestinatario, mensagem);
 
