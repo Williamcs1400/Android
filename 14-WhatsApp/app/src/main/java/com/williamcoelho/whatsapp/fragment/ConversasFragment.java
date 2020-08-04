@@ -113,8 +113,6 @@ public class ConversasFragment extends Fragment {
         databaseReference = ConfiguracaoFirebase.getFirebaseDatabase();
         conversasRef = databaseReference.child("Conversas").child(idUsuario);
 
-        recuperarConversas();
-
         return view;
     }
 
@@ -149,7 +147,21 @@ public class ConversasFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        recuperarConversas();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        conversasRef.removeEventListener(childEventListenerConversas);
+    }
+
     public void recuperarConversas(){
+
+        listaConversas.clear();
 
         childEventListenerConversas = conversasRef.addChildEventListener(new ChildEventListener() {
             @Override

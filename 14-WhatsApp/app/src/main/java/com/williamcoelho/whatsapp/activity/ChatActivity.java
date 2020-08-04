@@ -202,9 +202,6 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
-
-        recuperarMensagem();
-
     }
 
     @Override
@@ -254,15 +251,37 @@ public class ChatActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     Uri url = task.getResult();
 
-                                    Mensagem mensagem = new Mensagem();
-                                    mensagem.setIdUsuario(idRemetente);
-                                    mensagem.setConteudo("imagem.jpeg");
-                                    mensagem.setImagem(url.toString());
+                                    if(!isGroup){
 
-                                    //Salvar para o remetente e na funcao chama para salvar para o destinatario
-                                    salvarMensagem(idRemetente, idDestinatario, mensagem);
+                                        Mensagem mensagem = new Mensagem();
+                                        mensagem.setIdUsuario(idRemetente);
+                                        mensagem.setConteudo("imagem.jpeg");
+                                        mensagem.setImagem(url.toString());
 
-                                    salvarMensagemDestinatario(idDestinatario, idRemetente, mensagem);
+                                        //Salvar para o remetente e na funcao chama para salvar para o destinatario
+                                        salvarMensagem(idRemetente, idDestinatario, mensagem);
+
+                                        salvarMensagemDestinatario(idDestinatario, idRemetente, mensagem);
+
+                                    }else{
+
+                                        for(Usuario membro: grupo.getMembros()) {
+
+                                            String idRemetenteGrupo = Base64Custom.codificar(membro.getEmail());
+                                            String idUsuarioLogadoGrupo = UsuarioFirebase.getIdUsuario();
+
+                                            Mensagem mensagem = new Mensagem();
+                                            mensagem.setIdUsuario(idUsuarioLogadoGrupo);
+                                            mensagem.setConteudo("imagem.jpeg");
+                                            mensagem.setNome(usuarioRemetente.getNome());
+                                            mensagem.setImagem(url.toString());
+
+                                            salvarMensagem(idRemetenteGrupo, idDestinatario, mensagem);
+
+                                            salvarConversa(idRemetenteGrupo, idDestinatario, usuarioDestinatario, mensagem, true);
+                                        }
+
+                                    }
 
                                 }
                             });
@@ -369,19 +388,21 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    /*@Override
+    @Override
     protected void onStart() {
         super.onStart();
         recuperarMensagem();
-    }*/
+    }
 
-    /*@Override
-    protected void onPause() {
-        super.onPause();
+    @Override
+    protected void onStop() {
+        super.onStop();
         mensagens.removeEventListener(childEventListenerMensagens);
-    }*/
+    }
 
     private void recuperarMensagem(){
+
+        listaMensagens.clear();
 
         childEventListenerMensagens = mensagens.addChildEventListener(new ChildEventListener() {
             @Override

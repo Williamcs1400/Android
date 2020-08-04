@@ -44,6 +44,8 @@ public class ContatosFragment extends Fragment {
 
     private FirebaseUser userAtual;
 
+    private ValueEventListener valueEventListener;
+
     public ContatosFragment() {
         // Required empty public constructor
     }
@@ -68,8 +70,6 @@ public class ContatosFragment extends Fragment {
         recyclerViewListaContatos.setLayoutManager(layoutManager);
         recyclerViewListaContatos.setHasFixedSize(true);
         recyclerViewListaContatos.setAdapter(adapterContatos);
-
-        recuperarContatos();
 
         recyclerViewListaContatos.addOnItemTouchListener(new RecyclerItemClickListener(
                 getActivity(), recyclerViewListaContatos, new RecyclerItemClickListener.OnItemClickListener() {
@@ -102,21 +102,28 @@ public class ContatosFragment extends Fragment {
             }
         }
         ));
-
-        Usuario itemGrupo = new Usuario();
-        itemGrupo.setNome("Novo grupo");
-        itemGrupo.setEmail("");
-
-        listaContatos.add(itemGrupo);
-
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        recuperarContatos();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        contatosRef.removeEventListener(valueEventListener);
     }
 
     public void recuperarContatos(){
 
-        contatosRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = contatosRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                limparListaContatos();
 
                 for(DataSnapshot dados: dataSnapshot.getChildren()){
 
@@ -136,7 +143,20 @@ public class ContatosFragment extends Fragment {
 
             }
         });
+    }
 
+    public void limparListaContatos(){
+
+        listaContatos.clear();
+        adicionarNovoGrupo();
+    }
+
+    public void adicionarNovoGrupo(){
+        Usuario itemGrupo = new Usuario();
+        itemGrupo.setNome("Novo grupo");
+        itemGrupo.setEmail("");
+
+        listaContatos.add(itemGrupo);
     }
 
 }
