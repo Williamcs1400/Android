@@ -128,6 +128,8 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                     i.putExtra("chatGrupo", grupo);
                     startActivity(i);
 
+                    finish();
+
                 }else{
                     Toast.makeText(getApplicationContext(), "Digite um nome para o grupo", Toast.LENGTH_LONG).show();
                 }

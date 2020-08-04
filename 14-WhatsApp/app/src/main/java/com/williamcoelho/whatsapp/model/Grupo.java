@@ -39,7 +39,7 @@ public class Grupo implements Serializable {
             Conversa conversa = new Conversa();
             conversa.setIdRemetente(idRemetente);
             conversa.setIdDestinatario(idDestinatario);
-            conversa.setUltimaMensagem("");
+            conversa.setUltimaMensagem(conversa.getUltimaMensagem());
             conversa.setEhGrupo("true");
             conversa.setGrupo(this);
 

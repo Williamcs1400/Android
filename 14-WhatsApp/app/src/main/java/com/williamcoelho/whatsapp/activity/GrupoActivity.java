@@ -158,6 +158,8 @@ public class GrupoActivity extends AppCompatActivity {
                 Intent i = new Intent(GrupoActivity.this, CadastroGrupoActivity.class);
                 i.putExtra("Membros", (Serializable) listaMembrosSelecionados);
                 startActivity(i);
+
+                finish();
             }
         });
 

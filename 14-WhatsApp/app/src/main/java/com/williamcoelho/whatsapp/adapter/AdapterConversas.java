@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.williamcoelho.whatsapp.R;
 import com.williamcoelho.whatsapp.model.Conversa;
 import com.williamcoelho.whatsapp.model.Grupo;
+import com.williamcoelho.whatsapp.model.Usuario;
 
 import java.util.List;
 
@@ -67,19 +68,24 @@ public class AdapterConversas extends RecyclerView.Adapter<AdapterConversas.MyVi
 
         }else {
 
-            holder.textViewNomeContato.setText(listaConversa.getUsuarioExibicao().getNome());
-            holder.textViewEmailContato.setText(listaConversa.getUltimaMensagem());
+            Usuario usuario = listaConversa.getUsuarioExibicao();
 
-            if(listaConversa.getUsuarioExibicao().getFoto() != null){
+            if(usuario != null){
 
-                Uri uri = Uri.parse(listaConversa.getUsuarioExibicao().getFoto());
+                holder.textViewNomeContato.setText(listaConversa.getUsuarioExibicao().getNome());
+                holder.textViewEmailContato.setText(listaConversa.getUltimaMensagem());
 
-                Glide.with(context).load(uri).into(holder.imageViewFotoContato);
+                if(listaConversa.getUsuarioExibicao().getFoto() != null){
 
-            }else{
+                    Uri uri = Uri.parse(listaConversa.getUsuarioExibicao().getFoto());
 
-                holder.imageViewFotoContato.setImageResource(R.drawable.padrao);
+                    Glide.with(context).load(uri).into(holder.imageViewFotoContato);
 
+                }else{
+
+                    holder.imageViewFotoContato.setImageResource(R.drawable.padrao);
+
+                }
             }
         }
     }
