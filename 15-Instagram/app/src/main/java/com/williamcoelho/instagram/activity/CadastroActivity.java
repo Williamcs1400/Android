@@ -3,9 +3,11 @@ package com.williamcoelho.instagram.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +26,7 @@ public class CadastroActivity extends AppCompatActivity {
     private EditText editNomeCadastro;
     private EditText editEmailCadastro;
     private EditText editSenhaCadastro;
+    private ProgressBar progressCadastro;
 
     private Usuario usuario;
 
@@ -38,6 +41,9 @@ public class CadastroActivity extends AppCompatActivity {
         editNomeCadastro = findViewById(R.id.editNomeCadastro);
         editEmailCadastro = findViewById(R.id.editEmailCadastro);
         editSenhaCadastro = findViewById(R.id.editSenhaCadastro);
+        progressCadastro = findViewById(R.id.progressCadastro);
+
+        editNomeCadastro.requestFocus();
 
         auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
@@ -45,15 +51,22 @@ public class CadastroActivity extends AppCompatActivity {
 
     public void cadastarUsuario(View view){
 
+        progressCadastro.setVisibility(View.VISIBLE);
+
         auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
         if(validaCampos()){
-            auth.createUserWithEmailAndPassword(usuario.getEmail(), usuario.getEmail())
-            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            auth.createUserWithEmailAndPassword(usuario.getEmail(), usuario.getSenha())
+            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
 
+                    progressCadastro.setVisibility(View.GONE);
+
                     if(task.isSuccessful()){
+
+                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        finish();
 
                     }else{
 
@@ -67,7 +80,7 @@ public class CadastroActivity extends AppCompatActivity {
                         }catch(FirebaseAuthUserCollisionException e){
                             excecao = "Esse email já foi cadastrado";
                         }catch(Exception e){
-                            excecao = "Erro ao cadastrar";
+                            excecao = "Erro ao cadastrar" + e.getMessage();
                         }
                         Toast.makeText(getApplicationContext(), excecao, Toast.LENGTH_LONG).show();
                     }
