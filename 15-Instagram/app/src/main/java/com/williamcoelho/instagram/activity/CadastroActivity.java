@@ -1,14 +1,14 @@
 package com.williamcoelho.instagram.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.williamcoelho.instagram.R;
 import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
+import com.williamcoelho.instagram.helper.UsuarioFirebase;
 import com.williamcoelho.instagram.model.Usuario;
 
 public class CadastroActivity extends AppCompatActivity {
@@ -61,14 +62,33 @@ public class CadastroActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
 
-                    progressCadastro.setVisibility(View.GONE);
-
                     if(task.isSuccessful()){
 
-                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        finish();
+                        try{
+
+                            Toast.makeText(CadastroActivity.this, "Sucesso ao cadastrar usuário", Toast.LENGTH_LONG).show();
+                            //Salvar no firebase
+                            String idUsuario = task.getResult().getUser().getUid();
+                            usuario.setIdUsuario(idUsuario);
+                            usuario.salvar();
+
+                            //Salvar dados no profile do firebase
+                            UsuarioFirebase.atualizaNomeUsuario(usuario.getNome());
+
+                            progressCadastro.setVisibility(View.GONE);
+
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            finish();
+
+                        }catch(Exception e){
+                            progressCadastro.setVisibility(View.GONE);
+
+                            e.printStackTrace();
+                        }
 
                     }else{
+
+                        progressCadastro.setVisibility(View.GONE);
 
                         String excecao = "";
                         try{
