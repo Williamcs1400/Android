@@ -14,8 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
@@ -68,6 +71,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         usuarioPerfil = UsuarioFirebase.getUsuarioAtual();
         editNomePerfil.setText(usuarioPerfil.getDisplayName());
+        Uri url = usuarioPerfil.getPhotoUrl();
+        if(url != null){
+            Glide.with(EditarPerfilActivity.this).load(url).into(imagePerfil);
+        }
+        else{
+            imagePerfil.setImageResource(R.drawable.avatar);
+        }
 
     }
 
@@ -98,7 +108,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == RESULT_OK){
+        if(resultCode == RESULT_OK){
             Bitmap imagem = null;
 
             try{
@@ -120,7 +130,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     byte[] dadosImagem = baos.toByteArray();
 
                     //Salvar no firebase
-                    StorageReference imagemRef = ConfiguracaoFirebase.getStorageReference()
+                    final StorageReference imagemRef = ConfiguracaoFirebase.getStorageReference()
                             .child("imagens").child("perfil").child(UsuarioFirebase.getIdentificadorUsuario() + ".jpeg");
 
                     UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -132,7 +142,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    Uri url = task.getResult();
+                                    atualizarFotoUsuario(url);
+                                }
+                            });
                         }
                     });
 
@@ -140,11 +156,21 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
             }catch(Exception e){
                 e.printStackTrace();
+
             }
-
-
         }
+    }
 
+    private void atualizarFotoUsuario(Uri url){
+
+        //Atualizar a foto no profile do firebase
+        UsuarioFirebase.atualizaFotoUsuario(url);
+
+        //Atualizar a foto no database
+        usuarioLogado.setLinkFoto(url.toString());
+        usuarioLogado.atualizar();
+
+        Toast.makeText(getApplicationContext(), "Sua foto foi atualizada", Toast.LENGTH_SHORT).show();
     }
 
     //Sobrescreve esse metodo para voltar para a fragment de perfil

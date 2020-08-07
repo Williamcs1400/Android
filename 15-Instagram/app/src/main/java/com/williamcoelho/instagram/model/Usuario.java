@@ -4,16 +4,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Usuario {
+public class Usuario implements Serializable {
 
-    String nome;
-    String email;
-    String senha;
-    String idUsuario;
-    String linkFoto;
+    private String nome;
+    private String email;
+    private String senha;
+    private String idUsuario;
+    private String linkFoto;
+    private int seguidores = 0;
+    private int seguindo = 0;
+    private int publicacoes = 0;
 
     public Usuario() {
     }
@@ -44,8 +48,35 @@ public class Usuario {
         usuarioMap.put("nome", getNome());
         usuarioMap.put("idUsuario", getIdUsuario());
         usuarioMap.put("linkFoto", getLinkFoto());
+        usuarioMap.put("seguidores", getSeguidores());
+        usuarioMap.put("seguindo", getSeguindo());
+        usuarioMap.put("publicacoes", getPublicacoes());
 
         return usuarioMap;
+    }
+
+    public int getSeguidores() {
+        return seguidores;
+    }
+
+    public void setSeguidores(int seguidores) {
+        this.seguidores = seguidores;
+    }
+
+    public int getSeguindo() {
+        return seguindo;
+    }
+
+    public void setSeguindo(int seguindo) {
+        this.seguindo = seguindo;
+    }
+
+    public int getPublicacoes() {
+        return publicacoes;
+    }
+
+    public void setPublicacoes(int publicacoes) {
+        this.publicacoes = publicacoes;
     }
 
     public String getNome() {
@@ -53,7 +84,7 @@ public class Usuario {
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        this.nome = nome.toUpperCase();
     }
 
     public String getEmail() {
@@ -72,7 +103,7 @@ public class Usuario {
     public void setSenha(String senha) {
         this.senha = senha;
     }
-    
+
     public String getIdUsuario() {
         return idUsuario;
     }

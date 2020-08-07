@@ -1,5 +1,7 @@
 package com.williamcoelho.instagram.helper;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,6 +33,27 @@ public class UsuarioFirebase {
             FirebaseUser user = getUsuarioAtual();
 
             UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setDisplayName(nome).build();
+            user.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+
+                    }
+                }
+            });
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void atualizaFotoUsuario(Uri link){
+
+        try{
+
+            FirebaseUser user = getUsuarioAtual();
+
+            UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setPhotoUri(link).build();
             user.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
