@@ -23,6 +23,7 @@ import com.williamcoelho.instagram.activity.PerfilTerceiroActivity;
 import com.williamcoelho.instagram.adapter.AdapterPesquisa;
 import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
 import com.williamcoelho.instagram.helper.RecyclerItemClickListener;
+import com.williamcoelho.instagram.helper.UsuarioFirebase;
 import com.williamcoelho.instagram.model.Usuario;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ public class PesquisaFragment extends Fragment {
 
     private DatabaseReference usuariosRef;
 
+    private String idUsuario;
+
     public PesquisaFragment() {
         // Required empty public constructor
     }
@@ -56,6 +59,7 @@ public class PesquisaFragment extends Fragment {
         searchViewPesquisa = view.findViewById(R.id.searchViewPesquisa);
         recyclerViewPesquisa = view.findViewById(R.id.recyclerViewPesquisa);
         usuariosRef= ConfiguracaoFirebase.getDatabaseReference().child("Usuários");
+        idUsuario = UsuarioFirebase.getIdentificadorUsuario();
         listaUsuarios = new ArrayList<>();
 
         //Configurar adapter
@@ -124,7 +128,13 @@ public class PesquisaFragment extends Fragment {
                     listaUsuarios.clear();
                     for(DataSnapshot ds : dataSnapshot.getChildren()){
 
-                        listaUsuarios.add(ds.getValue(Usuario.class));
+                        //Verifica se eh usuario logado e remove da lista
+                        Usuario usuario = ds.getValue(Usuario.class);
+
+                        if(idUsuario.equals(usuario.getIdUsuario()))
+                            continue;
+
+                            listaUsuarios.add(usuario);
 
                     }
 

@@ -20,6 +20,8 @@ import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
 import com.williamcoelho.instagram.helper.UsuarioFirebase;
 import com.williamcoelho.instagram.model.Usuario;
 
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PerfilTerceiroActivity extends AppCompatActivity {
@@ -38,6 +40,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
     private ValueEventListener valueEventListener;
 
     private Usuario usuarioSelecionado;
+    private Usuario usuarioLogado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
         seguidores = findViewById(R.id.textQtdSeguidores);
         seguindo= findViewById(R.id.textQtdSeguindo);
         publicacoes = findViewById(R.id.textQTDPublicacoes);
-        buttonAcaoPerfil.setText("Seguir");
+        buttonAcaoPerfil.setText("Carregando");
 
         idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
 
@@ -72,7 +75,6 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
             exibirFoto();
         }
 
-        verificaSegueTerceiro();
     }
 
     public void exibirFoto(){
@@ -110,8 +112,6 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void verificaSegueTerceiro(){
 
         seguidoresRef = ConfiguracaoFirebase.getDatabaseReference().child("Seguidores").child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
@@ -127,12 +127,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
                 }else{
                     //Nao estah sendo seguido
                     habilitarBotaoSeguir(false);
-                    buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
 
-                        }
-                    });
                 }
             }
             @Override
@@ -141,24 +136,79 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
         });
     }
 
+    private void recuperarDadosUsuarioLogado(){
+
+        DatabaseReference usuarioLogadoRef = ConfiguracaoFirebase.getDatabaseReference().child("Usuários").child(idUsuarioLogado);
+        usuarioLogadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                usuarioLogado = dataSnapshot.getValue(Usuario.class);
+
+                verificaSegueTerceiro();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void habilitarBotaoSeguir(boolean seguindo) {
+
+        if (seguindo) {
+            buttonAcaoPerfil.setText("Seguindo");
+        } else {
+            buttonAcaoPerfil.setText("Seguir");
+            buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    salvarSeguidor();
+
+                }
+            });
+        }
+    }
+
     private void salvarSeguidor(){
 
+        HashMap<String, Object> dadosTerceiro = new HashMap<>();
+        dadosTerceiro.put("nome", usuarioSelecionado.getNome());
+        dadosTerceiro.put("linkFoto", usuarioSelecionado.getLinkFoto());
+
+        DatabaseReference seguidorRef = ConfiguracaoFirebase.getDatabaseReference().child("Seguidores")
+                .child(usuarioLogado.getIdUsuario()).child(usuarioSelecionado.getIdUsuario());
+
+        seguidorRef.setValue(dadosTerceiro);
+
+        buttonAcaoPerfil.setText("Seguindo");
+        buttonAcaoPerfil.setOnClickListener(null);
+
+        //Incrementar dados do perfil logado
+        int seguindo = usuarioLogado.getSeguindo() + 1;
+        HashMap<String, Object> dadosSeguindo = new HashMap<>();
+        dadosSeguindo.put("seguindo", seguindo);
+        DatabaseReference attUsuario = ConfiguracaoFirebase.getDatabaseReference().child("Usuários").child(usuarioLogado.getIdUsuario());
+        attUsuario.updateChildren(dadosSeguindo);
+
+        //Incrementar dados do perfil terceiro
+        int seguidores = usuarioSelecionado.getSeguidores() + 1;
+        HashMap<String, Object> dadosSeguidores = new HashMap<>();
+        dadosSeguidores.put("seguidores", seguidores);
+        DatabaseReference attTerceiro = ConfiguracaoFirebase.getDatabaseReference().child("Usuários").child(usuarioSelecionado.getIdUsuario());
+        attTerceiro.updateChildren(dadosSeguidores);
     }
 
-    private void habilitarBotaoSeguir(boolean seguindo){
-
-        if(seguindo){
-            buttonAcaoPerfil.setText("Seguindo");
-        }else{
-            buttonAcaoPerfil.setText("Seguir");
-        }
-
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
         recuperarDadosTerceiro();
+        recuperarDadosUsuarioLogado();
     }
 
     @Override
