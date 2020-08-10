@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.FiltrosActivity"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    tools:context=".activity.FiltrosActivity">
 
-    <ImageView
-        android:id="@+id/imageFotoEscolhida"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="420dp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/avatar" />
-</LinearLayout>
+        android:layout_height="match_parent"
+
+        android:orientation="vertical">
+
+        <include layout="@layout/toolbar" />
+
+        <ImageView
+            android:id="@+id/imageFotoEscolhida"
+            android:layout_width="match_parent"
+            android:layout_height="420dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/avatar" />
+
+        <EditText
+            android:id="@+id/editDescricao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:ems="10"
+            android:hint="Escreva uma descrição..."
+            android:inputType="textPersonName" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerFiltros"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</ScrollView>

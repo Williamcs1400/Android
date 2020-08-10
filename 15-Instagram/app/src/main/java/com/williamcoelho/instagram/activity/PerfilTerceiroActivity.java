@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,12 +16,19 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.williamcoelho.instagram.R;
+import com.williamcoelho.instagram.adapter.AdapterGrid;
 import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
 import com.williamcoelho.instagram.helper.UsuarioFirebase;
+import com.williamcoelho.instagram.model.Postagem;
 import com.williamcoelho.instagram.model.Usuario;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -31,9 +39,12 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
     private TextView seguidores;
     private TextView seguindo;
     private TextView publicacoes;
+    private GridView gridView;
+    private AdapterGrid adapterGrid;
 
     private DatabaseReference usuarioRef;
     private DatabaseReference seguidoresRef;
+    private DatabaseReference postagemUsuarioRef;
 
     private String idUsuarioLogado;
 
@@ -60,6 +71,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
         seguidores = findViewById(R.id.textQtdSeguidores);
         seguindo= findViewById(R.id.textQtdSeguindo);
         publicacoes = findViewById(R.id.textQTDPublicacoes);
+        gridView = findViewById(R.id.gridViewPerfil);
         buttonAcaoPerfil.setText("Carregando");
 
         idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
@@ -69,11 +81,17 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
         if(bundle != null){
             usuarioSelecionado = (Usuario) bundle.getSerializable("usuarioSelecionado");
 
+            postagemUsuarioRef = ConfiguracaoFirebase.getDatabaseReference().child("Postagens").child(usuarioSelecionado.getIdUsuario());
+
             //Colocar o nome do usuario na toolbar
             toolbar.setTitle(usuarioSelecionado.getNome());
 
             exibirFoto();
         }
+
+        iniciarImageLoader();
+
+        carregarPostagens();
 
     }
 
@@ -88,6 +106,53 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
             imagePerfilTerceiro.setImageResource(R.drawable.avatar);
         }
     }
+
+    public void iniciarImageLoader(){
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+                .memoryCacheSize(2 * 1024 * 1024)
+                .diskCacheSize(50 * 1024 * 1024)
+                .diskCacheFileCount(100).build();
+
+        ImageLoader.getInstance().init(config);
+
+    }
+
+    public void carregarPostagens(){
+
+        //Recupera as fotos postadas pelo usuario
+        postagemUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                int tamanhoGrid = getResources().getDisplayMetrics().widthPixels;
+                int tamanhoImagem = tamanhoGrid / 3;
+                gridView.setColumnWidth(tamanhoImagem);
+
+                List<String> urlFotos =  new ArrayList<>();
+                for(DataSnapshot ds: dataSnapshot.getChildren()){
+
+                    Postagem postagem = ds.getValue(Postagem.class);
+                    urlFotos.add(postagem.getCaminhoFoto());
+
+                }
+
+                publicacoes.setText(String.valueOf(urlFotos.size()));
+
+                //Configurar adapter
+                adapterGrid = new AdapterGrid(getApplicationContext(), R.layout.grid_postagem, urlFotos);
+
+                gridView.setAdapter(adapterGrid);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 
     public void recuperarDadosTerceiro(){
 
@@ -104,7 +169,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
                 seguidores.setText(strSeguidores);
                 seguindo.setText(strSeguindo);
-                publicacoes.setText(strPublicacoes);
+                //publicacoes.setText(strPublicacoes);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

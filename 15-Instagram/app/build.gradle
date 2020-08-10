@@ -48,6 +48,12 @@ dependencies {
     //CircleImageView
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
+    //Filtros
+    implementation 'info.androidhive:imagefilters:1.0.7'
+
+    //Biblioteca para carregar varias imagens
+    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+
 }
 
 apply plugin: 'com.android.application'
