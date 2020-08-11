@@ -41,6 +41,17 @@ public class Usuario implements Serializable {
 
     }
 
+    public void atualizarQtdPostagem(){
+
+        DatabaseReference reference = ConfiguracaoFirebase.getDatabaseReference();
+        DatabaseReference usuarioRef = reference.child("Usuários").child(getIdUsuario());
+
+        Map<String, Object> dados = new HashMap<>();
+        dados.put("publicacoes", getPublicacoes());
+        usuarioRef.updateChildren(dados);
+
+    }
+
     public Map<String, Object> converterParaMap(){
 
         HashMap<String, Object> usuarioMap = new HashMap<>();

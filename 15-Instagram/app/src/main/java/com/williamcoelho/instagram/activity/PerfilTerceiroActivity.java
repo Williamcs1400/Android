@@ -1,8 +1,10 @@
 package com.williamcoelho.instagram.activity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -47,6 +49,8 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
     private DatabaseReference postagemUsuarioRef;
 
     private String idUsuarioLogado;
+
+    private List<Postagem> postagens;
 
     private ValueEventListener valueEventListener;
 
@@ -93,6 +97,21 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
         carregarPostagens();
 
+        //Abre a foto clicada
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Postagem postagem = postagens.get(position);
+
+                Intent i = new Intent(getApplicationContext(), VisualizarPostagemActivity.class);
+                i.putExtra("postagem", postagem);
+                i.putExtra("usuarioSelecionado", usuarioSelecionado);
+                startActivity(i);
+
+            }
+        });
+
     }
 
     public void exibirFoto(){
@@ -121,6 +140,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
     public void carregarPostagens(){
 
         //Recupera as fotos postadas pelo usuario
+        postagens = new ArrayList<>();
         postagemUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -133,6 +153,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
                 for(DataSnapshot ds: dataSnapshot.getChildren()){
 
                     Postagem postagem = ds.getValue(Postagem.class);
+                    postagens.add(postagem);
                     urlFotos.add(postagem.getCaminhoFoto());
 
                 }
@@ -169,7 +190,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
                 seguidores.setText(strSeguidores);
                 seguindo.setText(strSeguindo);
-                //publicacoes.setText(strPublicacoes);
+                publicacoes.setText(strPublicacoes);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -179,7 +200,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
     private void verificaSegueTerceiro(){
 
-        seguidoresRef = ConfiguracaoFirebase.getDatabaseReference().child("Seguidores").child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+        seguidoresRef = ConfiguracaoFirebase.getDatabaseReference().child("Seguidores").child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
 
         seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -209,17 +230,13 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 usuarioLogado = dataSnapshot.getValue(Usuario.class);
-
                 verificaSegueTerceiro();
 
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
-
     }
 
     private void habilitarBotaoSeguir(boolean seguindo) {
@@ -231,9 +248,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
             buttonAcaoPerfil.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     salvarSeguidor();
-
                 }
             });
         }
@@ -241,14 +256,14 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
     private void salvarSeguidor(){
 
-        HashMap<String, Object> dadosTerceiro = new HashMap<>();
-        dadosTerceiro.put("nome", usuarioSelecionado.getNome());
-        dadosTerceiro.put("linkFoto", usuarioSelecionado.getLinkFoto());
+        HashMap<String, Object> dadosULogado= new HashMap<>();
+        dadosULogado.put("nome", usuarioLogado.getNome());
+        dadosULogado.put("linkFoto", usuarioLogado.getLinkFoto());
 
         DatabaseReference seguidorRef = ConfiguracaoFirebase.getDatabaseReference().child("Seguidores")
-                .child(usuarioLogado.getIdUsuario()).child(usuarioSelecionado.getIdUsuario());
+                .child(usuarioSelecionado.getIdUsuario()).child(usuarioLogado.getIdUsuario());
 
-        seguidorRef.setValue(dadosTerceiro);
+        seguidorRef.setValue(dadosULogado);
 
         buttonAcaoPerfil.setText("Seguindo");
         buttonAcaoPerfil.setOnClickListener(null);
@@ -284,9 +299,7 @@ public class PerfilTerceiroActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-
         finish();
-
         return false;
     }
 }

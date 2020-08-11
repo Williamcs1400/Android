@@ -142,7 +142,6 @@ public class PerfilFragment extends Fragment {
 
                 //Configurar adapter
                 adapterGrid = new AdapterGrid(getActivity(), R.layout.grid_postagem, urlFotos);
-
                 gridViewPerfil.setAdapter(adapterGrid);
             }
 

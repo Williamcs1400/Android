@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +24,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.williamcoelho.instagram.R;
@@ -31,6 +36,7 @@ import com.williamcoelho.instagram.helper.ConfiguracaoFirebase;
 import com.williamcoelho.instagram.helper.RecyclerItemClickListener;
 import com.williamcoelho.instagram.helper.UsuarioFirebase;
 import com.williamcoelho.instagram.model.Postagem;
+import com.williamcoelho.instagram.model.Usuario;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
@@ -53,8 +59,12 @@ public class FiltrosActivity extends AppCompatActivity {
     private EditText editDescricao;
     private AdapterMiniaturas adapterMiniaturas;
 
+    private AlertDialog dialog;
+
     private Bitmap imagem;
     private Bitmap imagemFiltro;
+
+    private Usuario usuarioLogado;
 
     private List<ThumbnailItem> listaFiltro;
 
@@ -78,6 +88,9 @@ public class FiltrosActivity extends AppCompatActivity {
         editDescricao = findViewById(R.id.editDescricao);
         listaFiltro = new ArrayList<>();
         idUsuarioLogado = UsuarioFirebase.getIdentificadorUsuario();
+        usuarioLogado = UsuarioFirebase.getDadosUsuarioLogado();
+
+        recuperarDadosUsuarioLogado();
 
         //Recupera imagem Escolhida pelo usuario
         Bundle bundle = getIntent().getExtras();
@@ -162,6 +175,7 @@ public class FiltrosActivity extends AppCompatActivity {
 
     private void publicarPostagem(){
 
+        abrirDialogCarregamento("Salvando postagem...");
         final Postagem postagem = new Postagem();
         postagem.setIdUsuario(idUsuarioLogado);
         postagem.setDescricao(editDescricao.getText().toString());
@@ -190,8 +204,15 @@ public class FiltrosActivity extends AppCompatActivity {
                         Uri url = task.getResult();
                         postagem.setCaminhoFoto(url.toString());
 
-                        if(postagem.salvar()){
+                        if (postagem.salvar()) {
+
+                            //Att o numero de postagens
+                            int qtd = usuarioLogado.getPublicacoes() + 1;
+                            usuarioLogado.setPublicacoes(qtd);
+                            usuarioLogado.atualizarQtdPostagem();
+
                             Toast.makeText(getApplicationContext(), "Sucesso ao salvar a imagem!", Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
                         }
                         finish();
                     }
@@ -199,6 +220,39 @@ public class FiltrosActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+
+    private void recuperarDadosUsuarioLogado(){
+
+        abrirDialogCarregamento("Carregando dados, aguarde!");
+        DatabaseReference usuarioLogadoRef = ConfiguracaoFirebase.getDatabaseReference().child("Usuários").child(idUsuarioLogado);
+        usuarioLogadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                usuarioLogado = dataSnapshot.getValue(Usuario.class);
+                dialog.cancel();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void abrirDialogCarregamento(String titulo){
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(titulo);
+        alert.setCancelable(false);
+        alert.setView(R.layout.carregamento);
+
+        dialog = alert.create();
+        dialog.show();
     }
 
 
