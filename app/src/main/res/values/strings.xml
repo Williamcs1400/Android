@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Álcool Ou Gasolina</string>
+    <string name="texto_tela_incial">Saiba a melhor opção para abastecer seu carro!</string>
+    <string name="preco_alcool">Preço por litro de Álcool. Ex: 3.25</string>
+    <string name="resposta">Digite os valores e apete em calcular!</string>
+    <string name="gasolina">Preço por litro de gasolina. Ex: 4.25</string>
+</resources>
