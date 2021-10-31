@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 MyTask task = new MyTask();
-                String urlApi = "https://viacep.com.br/ws/73061290/json/";
+                String urlApi = "https://viacep.com.br/ws/15370496/json/";
                 task.execute(urlApi);
             }
         });
