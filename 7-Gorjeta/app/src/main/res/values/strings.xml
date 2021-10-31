@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Cálculo de  Gorjeta</string>
-    <string name="valor_digitado">Digite o valor total. Ex: 65.15</string>
-    <string name="gorjeta">$Gorjeta$</string>
-</resources>
