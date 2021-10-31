@@ -5,4 +5,4 @@
     * > Projetos classificados com X na frente - Os projetos que são experimentais para abordar uma tarefa específica afim de aprendizado.
 
     ### [14 - WhatsApp Clone 📞](https://github.com/Williamcs1400/Android/tree/14-WhatsApp)
-    ![](assets/printContatosWpp.jpg)
+    <img src="assets/printContatosWpp.jpg" width="200">
